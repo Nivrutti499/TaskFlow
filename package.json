@@ -15,12 +15,19 @@
     "prisma:seed": "node prisma/seed.js",
     "prisma:studio": "prisma studio"
   },
-  "keywords": ["api", "task-manager", "express", "prisma", "jwt"],
+  "keywords": [
+    "api",
+    "task-manager",
+    "express",
+    "prisma",
+    "jwt"
+  ],
   "author": "TaskFlow",
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.10.2",
     "bcryptjs": "^2.4.3",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.18.3",

@@ -8,7 +8,8 @@
         "includeFiles": [
           "prisma/**",
           "src/**",
-          "node_modules/.prisma/**"
+          "node_modules/.prisma/**",
+          "node_modules/@prisma/client/**"
         ]
       }
     }
@@ -16,7 +17,11 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/index.js"
+      "dest": "api/index.js",
+      "headers": {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY"
+      }
     }
   ],
   "env": {

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -10,7 +11,7 @@ function formatDate(iso) {
   return { label: d.toLocaleDateString(), overdue: isOverdue }
 }
 
-export default function TaskCard({ task, onDelete, onStatusChange }) {
+function TaskCard({ task, onDelete, onStatusChange }) {
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -78,3 +79,5 @@ export default function TaskCard({ task, onDelete, onStatusChange }) {
     </div>
   )
 }
+
+export default memo(TaskCard)

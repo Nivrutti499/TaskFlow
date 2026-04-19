@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const compression = require('compression');
 
 const { globalLimiter } = require('./middleware/rateLimiter');
 const swaggerConfig = require('./swagger/swaggerConfig');
@@ -17,6 +18,8 @@ const auditRoutes = require('./routes/audit.routes');
 const app = express();
 
 // ─── Security & Utility Middleware ───────────────────────────────────────────
+// Gzip compress all responses for faster transfer
+app.use(compression());
 app.use(
   helmet({
     contentSecurityPolicy: false, // Allow Swagger UI to load
@@ -61,6 +64,7 @@ app.get('/', (req, res) => {
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
+  res.set('Cache-Control', 'no-store');
   res.json({
     success: true,
     data: {

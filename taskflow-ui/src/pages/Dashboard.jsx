@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import StatCard from '../components/StatCard'
@@ -25,10 +25,12 @@ export default function Dashboard() {
   const [filterStatus,   setFilterStatus]   = useState('')
   const [filterPriority, setFilterPriority] = useState('')
 
-  // ── Derived stats (from current page — full count comes from pagination.total)
-  const total    = pagInfo.total ?? 0
-  const inProg   = tasks.filter(t => t.status === 'IN_PROGRESS').length
-  const done     = tasks.filter(t => t.status === 'DONE').length
+  // ── Derived stats — memoised so they only recalculate when tasks change
+  const { total, inProg, done } = useMemo(() => ({
+    total:  pagInfo.total ?? 0,
+    inProg: tasks.filter(t => t.status === 'IN_PROGRESS').length,
+    done:   tasks.filter(t => t.status === 'DONE').length,
+  }), [tasks, pagInfo.total])
 
   const showToast = (msg, type = 'default') => setToast({ msg, type })
 
