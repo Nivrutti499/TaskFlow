@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Task Manager</title>
+  <meta name="description" content="TaskFlow is a modern task management platform with role-based access control and real-time audit logging." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     AUTH SCREEN
+═══════════════════════════════════════════════ -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <div class="auth-logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">TaskFlow</span>
+      </div>
+      <h1 class="auth-tagline">Manage tasks.<br/>Track progress.<br/><span>Ship faster.</span></h1>
+      <p class="auth-sub">Role-based task management with real-time audit logging for your entire team.</p>
+      <div class="auth-features">
+        <div class="feature-pill">✅ RBAC Permissions</div>
+        <div class="feature-pill">📊 Audit Logs</div>
+        <div class="feature-pill">🔐 JWT Auth</div>
+        <div class="feature-pill">⚡ Real-time</div>
+      </div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="you@company.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="login-password" class="form-input" placeholder="Enter password" required />
+            <button type="button" class="eye-btn" onclick="togglePassword('login-password')">👁</button>
+          </div>
+        </div>
+        <div id="login-error" class="form-error hidden"></div>
+        <button type="submit" class="btn-primary btn-full" id="login-btn">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-spinner hidden">⏳</span>
+        </button>
+        <p class="auth-hint">Demo: admin@taskflow.com / Admin@1234</p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label class="form-label">Full name</label>
+          <input type="text" id="reg-name" class="form-input" placeholder="John Doe" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="you@company.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="reg-password" class="form-input" placeholder="Min 8 chars, 1 upper, 1 number" required />
+            <button type="button" class="eye-btn" onclick="togglePassword('reg-password')">👁</button>
+          </div>
+        </div>
+        <div id="register-error" class="form-error hidden"></div>
+        <button type="submit" class="btn-primary btn-full" id="register-btn">
+          <span class="btn-text">Create Account</span>
+          <span class="btn-spinner hidden">⏳</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     DASHBOARD
+═══════════════════════════════════════════════ -->
+<div id="app" class="app hidden">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-icon-sm">⚡</div>
+        <span>TaskFlow</span>
+      </div>
+      <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+    </div>
+
+    <div class="user-card">
+      <div class="user-avatar" id="sidebar-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Admin User</div>
+        <div class="user-role-badge" id="sidebar-role">ADMIN</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active" href="#" onclick="showPage('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" href="#" onclick="showPage('tasks')">
+        <span class="nav-icon">✅</span> My Tasks
+      </a>
+      <a class="nav-item" href="#" onclick="showPage('profile')">
+        <span class="nav-icon">👤</span> Profile
+      </a>
+      <a class="nav-item" id="audit-nav" href="#" onclick="showPage('audit')" style="display:none">
+        <span class="nav-icon">📋</span> Audit Logs
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="handleLogout()">
+        <span>🚪</span> Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div class="main-area">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <h2 class="page-title" id="page-title">Dashboard</h2>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" class="search-input" placeholder="Search tasks..." oninput="handleSearch()" />
+        </div>
+        <div class="topbar-user">
+          <div class="topbar-avatar" id="topbar-avatar">A</div>
+          <span id="topbar-name">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page: Dashboard -->
+    <main class="page-content" id="page-dashboard">
+      <!-- Stats Row -->
+      <div class="stats-grid">
+        <div class="stat-card stat-total">
+          <div class="stat-icon">📋</div>
+          <div class="stat-info">
+            <div class="stat-number" id="stat-total">0</div>
+            <div class="stat-label">Total Tasks</div>
+          </div>
+        </div>
+        <div class="stat-card stat-todo">
+          <div class="stat-icon">🔵</div>
+          <div class="stat-info">
+            <div class="stat-number" id="stat-todo">0</div>
+            <div class="stat-label">To Do</div>
+          </div>
+        </div>
+        <div class="stat-card stat-progress">
+          <div class="stat-icon">🟡</div>
+          <div class="stat-info">
+            <div class="stat-number" id="stat-progress">0</div>
+            <div class="stat-label">In Progress</div>
+          </div>
+        </div>
+        <div class="stat-card stat-done">
+          <div class="stat-icon">🟢</div>
+          <div class="stat-info">
+            <div class="stat-number" id="stat-done">0</div>
+            <div class="stat-label">Completed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Tasks -->
+      <div class="section-header">
+        <h3 class="section-title">Recent Tasks</h3>
+        <button class="btn-primary btn-sm" id="create-task-btn-dash" onclick="openCreateModal()" style="display:none">+ New Task</button>
+      </div>
+      <div id="dashboard-tasks" class="task-list"></div>
+    </main>
+
+    <!-- Page: Tasks -->
+    <main class="page-content hidden" id="page-tasks">
+      <div class="filters-bar">
+        <div class="filters-left">
+          <select class="filter-select" id="filter-status" onchange="applyFilters()">
+            <option value="">All Statuses</option>
+            <option value="TODO">To Do</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="DONE">Done</option>
+          </select>
+          <select class="filter-select" id="filter-priority" onchange="applyFilters()">
+            <option value="">All Priorities</option>
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LOW">Low</option>
+          </select>
+        </div>
+        <button class="btn-primary btn-sm" id="create-task-btn" onclick="openCreateModal()" style="display:none">+ New Task</button>
+      </div>
+
+      <div id="tasks-list" class="task-list"></div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination">
+        <button class="page-btn" id="prev-btn" onclick="changePage(-1)">← Prev</button>
+        <span class="page-info" id="page-info">Page 1</span>
+        <button class="page-btn" id="next-btn" onclick="changePage(1)">Next →</button>
+      </div>
+    </main>
+
+    <!-- Page: Profile -->
+    <main class="page-content hidden" id="page-profile">
+      <div class="profile-card">
+        <div class="profile-avatar-lg" id="profile-avatar-lg">A</div>
+        <div class="profile-details">
+          <h2 id="profile-name-display">Admin User</h2>
+          <p id="profile-email-display" class="profile-email">admin@taskflow.com</p>
+          <span class="badge-role" id="profile-role-display">ADMIN</span>
+        </div>
+      </div>
+
+      <div class="profile-form-card">
+        <h3>Update Profile</h3>
+        <form onsubmit="handleProfileUpdate(event)">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="update-name" class="form-input" placeholder="Your name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Current Password</label>
+            <input type="password" id="update-current-pw" class="form-input" placeholder="Required to change password" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input type="password" id="update-new-pw" class="form-input" placeholder="Leave blank to keep current" />
+          </div>
+          <div id="profile-msg" class="form-error hidden"></div>
+          <button type="submit" class="btn-primary">Save Changes</button>
+        </form>
+      </div>
+    </main>
+
+    <!-- Page: Audit -->
+    <main class="page-content hidden" id="page-audit">
+      <div id="audit-list" class="audit-list"></div>
+      <div class="pagination" id="audit-pagination">
+        <button class="page-btn" id="audit-prev-btn" onclick="changeAuditPage(-1)">← Prev</button>
+        <span class="page-info" id="audit-page-info">Page 1</span>
+        <button class="page-btn" id="audit-next-btn" onclick="changeAuditPage(1)">Next →</button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     CREATE / EDIT TASK MODAL
+═══════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="task-modal" onclick="closeModalOnOverlay(event)">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modal-title">Create Task</h3>
+      <button class="modal-close" onclick="closeTaskModal()">✕</button>
+    </div>
+    <form id="task-form" onsubmit="handleTaskSubmit(event)">
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input type="text" id="task-title" class="form-input" placeholder="Task title" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="task-desc" class="form-input form-textarea" placeholder="Describe the task..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select id="task-priority" class="form-input">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM" selected>Medium</option>
+            <option value="HIGH">High</option>
+          </select>
+        </div>
+        <div class="form-group" id="status-group">
+          <label class="form-label">Status</label>
+          <select id="task-status" class="form-input">
+            <option value="TODO">To Do</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="DONE">Done</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Due Date</label>
+        <input type="datetime-local" id="task-due" class="form-input" />
+      </div>
+      <div class="form-group" id="assignee-group">
+        <label class="form-label">Assign To</label>
+        <select id="task-assignee" class="form-input">
+          <option value="">Unassigned</option>
+        </select>
+      </div>
+      <div id="task-form-error" class="form-error hidden"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" onclick="closeTaskModal()">Cancel</button>
+        <button type="submit" class="btn-primary" id="task-submit-btn">Create Task</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
